@@ -2,6 +2,17 @@ const User = require("../models/User")
 
 class UserController{
 
+    async index(req, res){
+        try{
+
+            const users = await User.findAll();
+            res.json(users);
+
+        }catch(err){
+            console.log(err)
+        }
+    }
+
     async create(req, res){
         const {email, name, password} = req.body;
 
@@ -11,7 +22,7 @@ class UserController{
                 return res.status(400).send({error: "Email is not defined"});
 
         }catch(err){
-            console.log(err)
+            console.log(err);
         }
 
         const emailExist = await User.findEmail(email);
