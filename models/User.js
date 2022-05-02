@@ -42,11 +42,11 @@ class User{
            if(result.length > 0){
                return result[0];
            }else{
-               return undefined
+               return undefined;
            }
         }catch(err){
             console.log(err);
-            return undefined 
+            return undefined;
         }
     }
 }
