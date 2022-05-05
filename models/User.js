@@ -1,6 +1,7 @@
 const knex = require ("../database/connection");
 const bcrypt = require("bcrypt");
 
+
 class User{
 
     async new(email, name, password){
@@ -47,6 +48,60 @@ class User{
         }catch(err){
             console.log(err);
             return undefined;
+        }
+    }
+    
+    async update(id, email, name, role){
+
+        const user = await this.findById(id);
+
+        if(user != undefined){
+            
+            var editUser = {};
+
+            if(email != undefined){
+                if(email != user.email){
+                    var result = await this.findEmail(email);
+                    if(result == false){
+                        editUser.email = email;
+                    }else{
+                        return res.status(400).send({Error: "User already exist"});
+                    }
+                }
+            }
+            if(name != undefined){
+                editUser.name = name 
+            }
+
+            if(role != undefined){
+                editUser.role = role 
+            }
+
+            try{
+                await knex.update(editUser).where({id: id}).table("users");
+                return res.status(200);
+            }catch(err){
+                return res.status(400).send({Error: err});
+            }
+
+        }else{
+            return res.status(404).send({Error: "User not found"});
+        }
+    }
+    async delete(id){
+        const user = await this.findById(id);
+
+        if(user != undefined){
+
+            try{
+                await knex.delete().where({id: id}).table("users");
+                return res.status(200);
+            }catch(err){
+                return {status: true, err: err};
+            }
+
+        }else{
+            return { status: false, err: "O usuario não existe, portanto não pode ser deletado."};
         }
     }
 }
