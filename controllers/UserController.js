@@ -1,5 +1,8 @@
-const User = require("../models/User")
-const PasswordToken = require("../models/PasswordToken")
+const User = require("../models/User");
+const PasswordToken = require("../models/PasswordToken");
+const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv").config();
+const bcrypt = require("bcrypt");
 
 class UserController{
 
@@ -96,6 +99,39 @@ class UserController{
             res.status(400).send(result.err)
         }
 
+    }
+
+    async changePassword(req, res){
+        var token = req.body.token;
+        var password = req.body.password;
+
+        var isTokenValid = await PasswordToken.validate(token);
+
+        if(isTokenValid.status){
+            
+            await User.changePassword(password, isTokenValid.token.user_id, isTokenValid.token.token);
+
+            res.status(200).send("Senha alterada!");
+
+        }else{
+            res.status(406).send("Token Invalido");
+        }
+    }
+
+    async login(req,res){
+        const {email, password} = req.body;
+
+        const user = await User.findByEmail(email);
+
+        if(user != undefined){
+
+            var result = await bcrypt.compare(password, user.password);
+
+            res.json({ status: result });
+            
+        }else{
+            res.json({ status: false});
+        }
     }
 
 }
