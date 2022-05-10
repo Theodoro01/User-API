@@ -33,10 +33,11 @@ class UserController{
         const {email, name, password} = req.body;
 
         try{
-            if(email == undefined)
-                return res.status(400).send({error: "Email is not defined"});
+            if(email === undefined)
+                return res.status(401).send({error: "Email is not defined"});
+
         }catch(err){
-            console.log(err);
+            return res.status(401).send({Error: "Unauthorized"});
         }
 
         const emailExist = await User.findEmail(email);
@@ -111,7 +112,7 @@ class UserController{
             
             await User.changePassword(password, isTokenValid.token.user_id, isTokenValid.token.token);
 
-            res.status(200).send("Senha alterada!");
+            res.status(200).send("Changed password!");
 
         }else{
             res.status(406).send("Token Invalido");
@@ -126,6 +127,14 @@ class UserController{
         if(user != undefined){
 
             var result = await bcrypt.compare(password, user.password);
+
+            if(result){
+                var token = jwt.sign({email: user.email, role: user.role}, process.env.SECRET_TOKEN);
+
+                res.status(200).json({token: token})
+            }else{
+                res.status(400).send("Invalid Password")
+            }
 
             res.json({ status: result });
             
